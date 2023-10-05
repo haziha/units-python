@@ -1,15 +1,17 @@
 import inspect
 import typing
 
-Parameter = inspect.Parameter
-ParameterKind = Parameter.POSITIONAL_ONLY.__class__
-T = typing.TypeVar("T")
+from .units import Parameter, ParameterKind, T
 
 
 class Signature:
     def __init__(self, fn: typing.Callable):
         self.__sigs = inspect.signature(fn)
         self.__pars = self.__sigs.parameters
+
+    @property
+    def signature(self):
+        return self.__sigs
 
     @property
     def return_annotation(self):
@@ -59,7 +61,7 @@ class Signature:
         po, pok, vp, ko, vk = self.__arguments_signature(self.__pars, build_name, default_name)
         po_n, pok_n, vp_n, ko_n, vk_n = self.traversal_parameters(self.__pars, build_type)
         po_t, pok_t, vp_t, ko_t, vk_t = self.traversal_parameters(self.__pars, get_type_annotation)
-        type_dict = {}
+        type_dict: typing.Dict[str, typing.Any] = {}
         type_dict.update(zip(po_n, po_t))
         type_dict.update(zip(pok_n, pok_t))
         type_dict.update(zip(vp_n, vp_t))
