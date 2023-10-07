@@ -14,6 +14,16 @@ class Signature:
         return self.__sigs
 
     @property
+    def annotation(self):
+        types_list = []
+        for par in self.__pars.values():
+            if par.annotation is par.empty:
+                types_list.append(object)
+            else:
+                types_list.append(par.annotation)
+        return tuple(types_list)
+
+    @property
     def return_annotation(self):
         if self.__sigs.return_annotation is self.__sigs.empty:
             return typing.Any
