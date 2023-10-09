@@ -32,11 +32,19 @@ class QtAsyncio:
     def __init__(self, loop: asyncio.AbstractEventLoop):
         self.__loop = loop
         self.__async_object = QtAsyncioObject()
-        self.__next_guest_run_schedule()
+        self.__sem = 0
 
-    @property
-    def create_task(self):
-        return self.__loop.create_task
+    def create_task(self, async_fn: typing.Coroutine):
+        self.__sem += 1
+        task = self.__loop.create_task(self.__run_async_fn(async_fn))
+        self.__next_guest_run_schedule()
+        return task
+
+    async def __run_async_fn(self, async_fn: typing.Coroutine):
+        try:
+            return await async_fn
+        finally:
+            self.__sem -= 1
 
     @property
     def loop(self):
@@ -48,7 +56,8 @@ class QtAsyncio:
 
     def __next_guest_run_schedule(self):
         self.__loop.stop()
-        QCoreApplication.postEvent(self.__async_object, QtAsyncioEvent(self.__continue_loop))
+        if self.__sem != 0:
+            QCoreApplication.postEvent(self.__async_object, QtAsyncioEvent(self.__continue_loop))
 
 
 __all__ = [
