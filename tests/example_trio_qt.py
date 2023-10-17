@@ -17,11 +17,10 @@ class MainWindow(QMainWindow):
 
     async def __btn_clicked(self):
         async def __open_main_window():
-            lot = trio.lowlevel.ParkingLot()
             async with trio.open_nursery() as nursery:
                 mw = MainWindow(nursery)
                 mw.show()
-                await lot.park()
+                await trio.sleep_forever()
 
         self.nursery.start_soon(__open_main_window)
 
@@ -40,11 +39,10 @@ if __name__ == "__main__":
 
 
     async def show():
-        lot = trio.lowlevel.ParkingLot()
         async with trio.open_nursery() as nursery:
             main_window = MainWindow(nursery)
             main_window.show()
-            await lot.park()
+            await trio.sleep_forever()
 
 
     trio_qt.run(show)
